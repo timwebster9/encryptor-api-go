@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  bind:
+    image: timw/encryptor-api
+    ports:
+      - "80:9090"

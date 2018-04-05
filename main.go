@@ -32,8 +32,9 @@ func postAPI(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
-		cipherData := CipherData{secret, key, encrypted}
-		fmt.Printf("Encrypted secret is: %x", cipherData.Ciphertext)
+		formatted := fmt.Sprintf("%x", encrypted)
+		cipherData := CipherData{secret, key, formatted}
+		fmt.Printf("Encrypted secret is: %s", cipherData.Ciphertext)
 
 		t, _ := template.ParseFiles("static/index.html")
 		t.Execute(w, cipherData)
@@ -41,13 +42,18 @@ func postAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 func execMainPage(w http.ResponseWriter) {
-	t, _ := template.ParseFiles("static/index.html")
+	t, err := template.ParseFiles("static/index.html")
+	if (err != nil) {
+		log.Fatalf("Error parsing template: %s", err)
+	}
 	t.Execute(w, nil)
 }
 
 func main() {
 	http.HandleFunc("/", start) // set router
 	http.HandleFunc("/api", postAPI) // set router
+
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static")))) 
 
     err := http.ListenAndServe(":9090", nil) // set listen port
     if err != nil {
